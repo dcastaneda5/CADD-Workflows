@@ -7,61 +7,60 @@ fi
 
 TARGET=$1
 LINK=http://dude.docking.org/targets/"$TARGET/$TARGET".tar.gz
-echo "Downloading "$LINK""
+
 # Download the file
+echo "Downloading "$LINK""
 wget $LINK
 
 #Decompress
 echo "Decompressing "$1""
 tar -xvf "$TARGET".tar.gz
+rm -f "$TARGET".tar.gz
 
-# Get into the directory
 cd $TARGET
 
 #Decompress actives and decoys
 gunzip actives_final.mol2.gz
 gunzip decoys_final.mol2.gz
 
-mkdir actives_mol2
-cd actives_mol2
+# Convert receptor to pdbqt
+
+# Split actives and decoys
 echo "Splitting actives"
-python ../../split_mol2.py ../actives_final.mol2
+python ../split_mol2.py actives_final.mol2
 echo "Done"
-cd ../
-mkdir decoys_mol2
-cd decoys_mol2
 echo "Splitting decoys"
-python ../../split_mol2.py ../decoys_final.mol2
-echo "Done"
-cd ../
-
-#Convert mol2 files to pdbqt files
-echo "Converting mol2 files to pdbqt files"
-bash ../convert_ligands2pdbqt.sh
-cp ../mol2_to_pdbqt.slurm .
-
-echo "Submitting jobs"
-sbatch mol2_to_pdbqt.slurm
-rm mol2_to_pdbqt.slurm
+python ../split_mol2.py decoys_final.mol2
 echo "Done"
 
-########## SECOND PART (run2.sh)  #####################
-
-echo "mkdir actives
-mv actives_final* actives
+# Moving actives and decoys to folders
+echo "Moving actives and decoys to folders"
+mkdir actives
+mv actives_final*.mol2 actives
 mkdir decoys
-mv decoys_final* decoys
+mv decoys_final*.mol2 decoys
 
-echo \"Generating the docking script\"
-bash ../docking_script_generator.sh
+# Convert mol2 files to pdbqt files
+echo "Converting mol2 files to pdbqt files"
+echo "Submitting job"
+sleep 2
+sbatch --wait ../mol2pdbqt.slurm $TARGET
+echo "Done"
 
-echo \"Submitting the job for docking\"
-cp ../docking_launcher.slurm .
-sbatch docking_launcher.slurm
+# Move actives and decoys to folders
+echo "Moving actives and decoys to folders" 
+mv actives_final*.pdbqt actives
+mv decoys_final*.pdbqt decoys
 
-echo \"DONE\" " > run2.sh
+# Dock
+echo "Sumbitting the job for docking"
+sleep 2
+sbatch ../dock.slurm $TARGET
 
-mv run2.sh $TARGET
+# DLScore
+#echo "Submitting the job for rescoring with dlscore"
+#echo "This job will run after docking is finished."
+#sbatch dlscore.slurm $TARGET
 
-echo "After the conversion of all the pdbqt files, go to the "$TARGET" directory and do -> bash run2.sh"
-
+# Return to working directory
+cd ..
