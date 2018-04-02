@@ -41,26 +41,24 @@ mkdir decoys
 mv decoys_final*.mol2 decoys
 
 # Convert mol2 files to pdbqt files
+cd ..
 echo "Converting mol2 files to pdbqt files"
 echo "Submitting job"
 sleep 2
-sbatch --wait ../mol2pdbqt.slurm $TARGET
+sbatch --wait mol2pdbqt.slurm $TARGET
 echo "Done"
 
 # Move actives and decoys to folders
 echo "Moving actives and decoys to folders" 
-mv actives_final*.pdbqt actives
-mv decoys_final*.pdbqt decoys
+mv actives_final*.pdbqt $TARGET/actives
+mv decoys_final*.pdbqt $TARGET/decoys
 
 # Dock
 echo "Sumbitting the job for docking"
 sleep 2
-sbatch ../dock.slurm $TARGET
+sbatch dock.slurm $TARGET
 
 # DLScore
 #echo "Submitting the job for rescoring with dlscore"
 #echo "This job will run after docking is finished."
 #sbatch dlscore.slurm $TARGET
-
-# Return to working directory
-cd ..
