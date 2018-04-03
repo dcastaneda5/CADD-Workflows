@@ -100,7 +100,7 @@ def convert_ligands(target_dir):
 def dock(target_dir):
     """Dock actives and decoys to target."""
     print("Submitting docking job.")
-    subprocess.Popen(["sbatch", "dock.slurm", target_dir, args.nodes])
+    subprocess.Popen(["sbatch", "dock.slurm", target_dir, str(args.nodes)])
 
 
 def rescore(target_dir):
@@ -108,6 +108,30 @@ def rescore(target_dir):
     print("Submitting rescoring job.")
     subprocess.Popen(["sbatch", "rescore.slurm", target_dir, args.nodes])
 
+
+def gen_slurm(target_dir, nhosts, job):
+    """Generate a SLURM submission script"""
+    script = """/
+    #!/bin/bash
+    #
+    # SLURM script for docking with smina.
+    #-------------------------------------------------------
+    #SBATCH -J {1}
+    #SBATCH -N {2} -n {3}
+    #SBATCH -p {4}
+    #SBATCH -o {0}_%j.out
+    #SBATCH -e {0}_%j.err
+    #SBATCH -t {5}:00:00
+    #SBATCH -A VinaXB
+    #SBATCH --mail-user=ravila11@miners.utep.edu
+    #SBATCH --mail-type=all
+    #------------------------------------------------------
+
+    module purge
+    module load TACC
+
+    python dock.py {0} {3}
+    """.format()
 
 if __name__ == "__main__":
     # Check if working directory exists
