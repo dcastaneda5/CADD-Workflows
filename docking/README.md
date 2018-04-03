@@ -1,7 +1,7 @@
 ## Automated script for docking DUD-E compounds
-```
-Usage:
 
+Usage:
+```
 python run.py -w <DUDE_working_directory> -r <receptor_name> [options]
 
 Options:
