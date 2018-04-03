@@ -76,7 +76,7 @@ def split(target_dir):
 
 
 def convert_receptor(target_dir):
-    """Convert a receptor to pdbqt."""
+    """Convert a receptor to pdbqt using MGLTools."""
     pdb = target_dir + "/receptor.pdb"
     root_path = os.path.splitext(pdb)[0]
     print("Converting receptor to pdbqt")
@@ -91,8 +91,23 @@ def convert_receptor(target_dir):
 
 
 def convert_ligands(target_dir):
-    """Convert ligands to pdbqt."""
-    subprocess.Popen(["sbatch", "--wait", "mol2pdbqt.slurm", target_dir]).wait()
+    """Convert ligands to pdbqt using MGLTools."""
+    print("Converting ligands to pdbqt")
+    subprocess.Popen(["sbatch", "--wait", "mol2pdbqt.slurm",
+                      target_dir]).wait()
+    print("Done.")
+
+
+def dock(target_dir):
+    """Dock actives and decoys to target."""
+    print("Submitting docking job.")
+    subprocess.Popen(["sbatch", "dock.slurm", target_dir, args.cpus])
+
+
+def rescore(target_dir):
+    """Rescore actives and decoys with DLScore."""
+    print("Submitting rescoring job.")
+    subprocess.Popen(["sbatch", "rescore.slurm", target_dir, args.cpus])
 
 
 if __name__ == "__main__":
@@ -119,3 +134,9 @@ if __name__ == "__main__":
     if args.convert or args.do_all:
         convert_receptor(target_dir)
         convert_ligands(target_dir)
+    # Docking
+    if args.dock or args.do_all:
+        dock(target_dir)
+    # Rescoring
+    #if args.dock or args.do_all:
+    #    rescore(target_dir)
