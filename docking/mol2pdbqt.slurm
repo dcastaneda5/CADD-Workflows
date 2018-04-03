@@ -16,4 +16,4 @@
 module purge
 module load TACC
 
-python $(dirname "$0")mol2pdbqt.py $1 128
+python mol2pdbqt.py $1 128
