@@ -28,9 +28,8 @@ parser.add_argument("--rescore", dest='rescore', action='store_true',
                     help="Rescore ligands.")
 parser.add_argument("--all", dest='do_all', action='store_true',
                     help="Perform all operations.")
-parser.add_argument("--cpus", type=int, default=1280,
-                    help="Number of SLURM processors for docking and " +
-                    "rescoring. (Number of nodes is cpus / 64)")
+parser.add_argument("-N", "--nodes", type=int, default=10,
+                    help="Number of SLURM nodes for docking and rescoring.")
 parser.set_defaults(split=False)
 parser.set_defaults(convert=False)
 parser.set_defaults(dock=False)
@@ -101,13 +100,13 @@ def convert_ligands(target_dir):
 def dock(target_dir):
     """Dock actives and decoys to target."""
     print("Submitting docking job.")
-    subprocess.Popen(["sbatch", "dock.slurm", target_dir, args.cpus])
+    subprocess.Popen(["sbatch", "dock.slurm", target_dir, args.nodes])
 
 
 def rescore(target_dir):
     """Rescore actives and decoys with DLScore."""
     print("Submitting rescoring job.")
-    subprocess.Popen(["sbatch", "rescore.slurm", target_dir, args.cpus])
+    subprocess.Popen(["sbatch", "rescore.slurm", target_dir, args.nodes])
 
 
 if __name__ == "__main__":

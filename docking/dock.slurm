@@ -3,7 +3,7 @@
 # SLURM script for docking with smina.
 #-------------------------------------------------------
 #SBATCH -J dock
-#SBATCH -N 10 -n 1280
+#SBATCH -N $2 -n $(($2 * 64))
 #SBATCH -p normal
 #SBATCH -o %j.out
 #SBATCH -e %j.err
@@ -16,5 +16,5 @@
 module purge
 module load TACC
 
-python dock.py $1 640
+python dock.py $1 $(($2 * 64))
 
