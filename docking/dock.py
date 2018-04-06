@@ -31,11 +31,11 @@ if __name__ == "__main__":
     # Docking parameters
     receptor = target_path + "/receptor.pdbqt"
     crystal_ligand = target_path + "/crystal_ligand.mol2"
-    ligands = glob.iglob(target_path + "/*/*.pdbqt")
+    ligands = glob.glob(target_path + "/*/*.pdbqt")
     num_modes = 12
     start_time = time.time()
-    # Start thread pool
+    # Start process pool
     with Pool(n_cpus) as pool:
-        executor.imap(dock, ligands, chunksize=10)
+        pool.map(dock, ligands, chunksize=10)
     stop_time = time.time()
     print("Job completed in:", stop_time - start_time, "seconds")
